@@ -1,0 +1,33 @@
+en
+conf t
+
+hostname CORE-R2
+line console 0
+pass cisco
+login
+exit
+
+enable password cisco
+no ip domain-lookup
+banner motd #Unautorized access#
+
+service password-encryption
+
+do wr
+
+
+ip domain-name cisco.net
+username admin password cisco
+crypto key generate rsa
+1024
+line vty 0 15
+login local
+transport input ssh
+exit
+
+ip ssh version 2
+
+do wr
+
+
+

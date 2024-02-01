@@ -1,0 +1,880 @@
+ISP-1  
+
+
+enable
+configure terminal
+interface FastEthernet0/0
+no shutdown
+exit
+interface FastEthernet0/1
+no shutdown
+exit
+interface Serial0/3/0
+no shutdown
+exit
+interface Serial0/3/1
+no shutdown
+enable
+configure terminal
+interface Serial0/3/0
+exit
+interface Serial0/3/0
+no ip address
+ip address 195.136.17.2 255.255.255.0
+ip address 195.136.17.2 255.255.255.0
+ip address 195.136.17.2 255.255.255.252
+exit
+interface Serial0/3/1
+ip address 195.136.17.10 255.255.255.252
+ip address 195.136.17.10 255.255.255.252
+exit
+interface Serial0/3/1
+do wr
+enable
+configure terminal
+interface FastEthernet0/1
+exit
+router ospf 10
+router-id 5.5.5.5
+network 195.136.17.8 0.0.0.3 area 0
+network 195.136.17.0 0.0.0.3 area 0
+do wr
+enable
+configure terminal
+interface FastEthernet0/0
+exit
+interface Serial0/3/0
+exit
+interface Serial0/3/1
+
+
+=============================
+ISP-2 
+
+enable
+configure terminal
+interface FastEthernet0/0
+no shutdown
+exit
+interface FastEthernet0/1
+no shutdown
+exit
+interface Serial0/3/0
+no shutdown
+exit
+interface Serial0/3/1
+no shutdown
+enable
+configure terminal
+interface Serial0/3/0
+ip address 195.136.17.6 255.255.255.0
+ip address 195.136.17.6 255.255.255.252
+exit
+interface Serial0/3/1
+ip address 195.136.17.14 255.255.255.252
+ip address 195.136.17.14 255.255.255.252
+do wr
+enable
+configure terminal
+interface FastEthernet0/1
+exit
+router ospf 10
+router-id 6.6.6.6
+network 195.136.17.4 0.0.0.3 area 0
+network 195.136.17.12 0.0.0.3 area 0
+do wr
+enable
+configure terminal
+interface Serial0/3/1
+ip address 195.136.17.14 255.255.255.252
+
+============================================
+
+CORE-R1 
+
+enable
+configure terminal
+interface GigabitEthernet0/0
+no shutdown
+exit
+interface GigabitEthernet0/1
+no shutdown
+exit
+interface GigabitEthernet0/2
+no shutdown
+exit
+interface Serial0/2/0
+no shutdown
+exit
+interface Serial0/2/1
+no shutdown
+en
+conf t
+hostname CORE-R1
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+ip domain name cisco.net
+username admin password cisco
+crypto key generate rsa
+line vty 0 15
+login local
+transport input ssh
+exit
+do wr
+ip ssh version 2
+do wr
+enable
+configure terminal
+interface GigabitEthernet0/0
+exit
+interface GigabitEthernet0/0
+exit
+interface GigabitEthernet0/0
+ip address 140.16.3.146 255.255.255.252
+no shutdown
+exit
+interface GigabitEthernet0/1
+ip address 140.16.3.154 255.255.255.252
+no shutdown
+exit
+int se0/2/0
+clock rate 64000
+ip address 195.136.17.1 255.255.255.252
+no shutdown
+exit
+int se0/2/1
+clock rate 64000
+ip address 195.136.17.5 255.255.255.252
+no shutdown
+exit
+do wr
+enable
+configure terminal
+interface GigabitEthernet0/0
+exit
+router ospf 10
+router-id 3.3.3.3
+network 140.16.3.144 0.0.0.3 area 0
+network 140.16.3.152 0.0.0.3 area 0
+network 195.136.17.0 0.0.0.3 area 0
+network 195.136.17.4 0.0.0.3 area 0
+do wr
+exit
+enable
+configure terminal
+interface GigabitEthernet0/0
+exit
+ip nat inside source list 1 int se0/2/0 overload
+ip nat inside source list 1 int se0/2/1 overload
+access-list 1 permit 140.16.1.0 0.0.0.127
+access-list 1 permit 140.16.1.128 0.0.0.127
+access-list 1 permit 140.16.2.0 0.0.0.127
+access-list 1 permit 140.16.2.128 0.0.0.127
+access-list 1 permit 140.16.3.0 0.0.0.127
+access-list 1 permit 140.16.3.128 0.0.0.15
+
+no access-list 1 permit 172.16.1.0 0.0.0.127
+no access-list 1 permit 172.16.1.128 0.0.0.127
+no access-list 1 permit 172.16.2.0 0.0.0.127
+no access-list 1 permit 172.16.2.128 0.0.0.127
+no access-list 1 permit 172.16.3.0 0.0.0.127
+no access-list 1 permit 172.16.3.128 0.0.0.15
+
+int range gig0/0-1
+ip nat inside
+exit
+int se0/2/0
+ip nat outside
+int se0/2/1
+ip nat outside
+ex
+do wr
+en
+conf t
+ip route 0.0.0.0 0.0.0.0 se0/2/0
+ip route 0.0.0.0 0.0.0.0 se0/2/1 70
+do wr
+ip route 0.0.0.0 0.0.0.0 se0/2/0
+ip route 0.0.0.0 0.0.0.0 se0/2/1 70
+do wr
+interface GigabitEthernet0/1
+ip address 140.16.3.154 255.255.255.252
+en
+
+
+================
+CORE-R2
+
+
+enable
+configure terminal
+interface GigabitEthernet0/0
+no shutdown
+exit
+interface GigabitEthernet0/1
+no shutdown
+exit
+interface GigabitEthernet0/2
+no shutdown
+exit
+interface Serial0/2/0
+no shutdown
+exit
+interface Serial0/2/1
+no shutdown
+en
+conf t
+hostname CORE-R2
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+ip domain name cisco.net
+username admin password cisco
+crypto key generate rsa
+line vty 0 15
+login local
+transport input ssh
+exit
+do wr
+ip ssh version 2
+do wr
+enable
+configure terminal
+interface GigabitEthernet0/0
+ip address 140.16.3.150 255.255.255.252
+no shutdown
+exit
+interface GigabitEthernet0/1
+ip address 140.16.3.158 255.255.255.252
+no shutdown
+exit
+int se0/2/0
+ip address 195.136.17.9 255.255.255.252
+no sh
+clock rate 64000
+ex
+int se0/2/1
+clock rate 64000
+no sh
+ip address 195.136.17.13 255.255.255.252
+do wr
+exit
+enable
+configure terminal
+interface GigabitEthernet0/0
+exit
+router ospf 10
+router-id 4.4.4.4
+network 140.16.3.148 0.0.0.3 area 0
+network 140.16.3.156 0.0.0.3 area 0
+network 195.136.17.8 0.0.0.3 area 0
+network 195.136.17.12 0.0.0.3 area 0
+do wr
+exit
+enable
+configure terminal
+interface GigabitEthernet0/1
+ex
+ip nat inside source list 1 int se0/2/0 overload
+ip nat inside source list 1 int se0/2/1 overload
+access-list 1 permit 140.16.1.0 0.0.0.127
+access-list 1 permit 140.16.1.128 0.0.0.127
+access-list 1 permit 140.16.2.0 0.0.0.127
+access-list 1 permit 140.16.2.128 0.0.0.127
+access-list 1 permit 140.16.3.0 0.0.0.127
+access-list 1 permit 140.16.3.128 0.0.0.15
+
+
+
+
+int range gig0/0-1
+ip nat inside
+ex
+int se0/2/0
+ip nat outside
+int se0/2/1
+ip nat outside
+ex
+do wr
+do sh ip nat transla
+ip route 0.0.0.0 0.0.0.0 se0/2/0
+ip route 0.0.0.0 0.0.0.0 se0/2/1 70
+ip route 0.0.0.0 0.0.0.0 se0/2/0
+ip route 0.0.0.0 0.0.0.0 se0/2/1 70
+do wr
+en
+conf t
+do sh ip nat translations
+enable
+configure terminal
+do sh ip nat translations
+do sh ip nat translations
+do sh ip nat translation
+
+
+
+===================================
+
+SALES Switch
+
+en
+conf t
+hostname Sales-SW
+banner motd #NO Unauthorised Access!!!#
+no ip domain lookup
+line console 0
+password cisco
+login
+exit
+enable password cisco
+service password-encryption
+exit
+do wr
+conf t
+do wr
+enable
+configure terminal
+interface FastEthernet0/1
+exit
+interface FastEthernet0/2
+exit
+interface FastEthernet0/3
+exit
+interface FastEthernet0/5
+exit
+interface FastEthernet0/1
+exit
+interface FastEthernet0/2
+exit
+interface FastEthernet0/3
+exit
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 10
+name Sales
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 10
+exit
+do wr
+vlan 99
+name BlackHole
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+shutdown
+exit
+do wr
+
+
+======================================
+
+HR Switch
+
+en
+conf t
+hostname HR-SW
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+en
+conf t
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 20
+name HR
+vlan 99
+name BlackHole
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 20
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+do wr
+
+
+=====================================
+
+FINANCE Switch
+
+
+en
+conf t
+hostname Finance-SW
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+enable
+configure terminal
+interface FastEthernet0/2
+exit
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 30
+name Finance
+vlan 99
+name BlackHole
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 30
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+do wr
+int range fa0/3-24
+switchport port-security maximum 1
+switchport port-security mac-address sticky
+switchport port-security violation shutdown
+exit
+do wr
+do sh port-security
+do show port-security
+do sh port security
+do show port security
+
+
+
+==============================================
+
+ADMIN Switch
+
+
+en
+conf t
+hostname Admin-SW
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+enable
+configure terminal
+interface FastEthernet0/2
+exit
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 40
+name Admin
+vlan 99
+name BlackHole
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 40
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+do wr
+
+
+
+=========================
+
+ICT Switch
+
+en
+conf t
+hostname ICT-SW
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+enable
+configure terminal
+interface FastEthernet0/5
+exit
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 50
+name ICT
+vlan 99
+name BlackHole
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 50
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+do wr
+
+
+
+=============================
+
+SERVER ROOM
+
+
+en
+conf t
+hostname Server-SW
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+enable
+configure terminal
+interface FastEthernet0/3
+exit
+int range fa0/1-2
+switchport mode trunk
+exit
+vlan 60
+name Server-Room
+vlan 99
+name BlackHole
+exit
+int range fa0/3-24
+switchport mode access
+switchport access vlan 60
+exit
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+do wr
+
+
+=======================
+MULTILAYER-1 Switch
+
+
+
+
+en
+conf t
+hostname Mlt-SW1
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+ip domain name cisco.net
+user
+username admin password cisco
+crypto key generate rsa
+line vty 0 15
+login local
+transport input ssh
+exit
+do wr
+ip ssh version 2
+do wr
+enable
+configure terminal
+interface GigabitEthernet1/0/3
+exit
+interface GigabitEthernet1/0/2
+exit
+int range gig1/0/3-8
+switchport mode trunk
+exit
+conf t
+int range gig1/0/3-8
+switchport mode trunk
+exit
+vlan 10
+name Sales
+vlan 20
+name HR
+vlan 30
+name Finance
+vlan 40
+name Admin
+vlan 50
+name ICT
+vlan 60
+name ServerRoom
+exit
+do wr
+en
+conf t
+int range gig1/0/1-2
+no switchport
+exit
+do wr
+int gig1/0/1
+ip address 140.16.3.145 255.255.255.252
+no shutdown
+exit
+do wr
+int gig1/0/2
+ip address 140.16.3.149 255.255.255.252
+no shutdown
+exit
+do wr
+enable
+configure terminal
+interface GigabitEthernet1/0/3
+exit
+interface GigabitEthernet1/0/2
+exit
+ip routing
+router ospf 10
+router-id 2.2.2.2
+network 140.16.1.0 0.0.0.127 area 0
+network 140.16.1.128 0.0.0.127 area 0
+network 140.16.2.0 0.0.0.127 area 0
+network 140.16.2.128 0.0.0.127 area 0
+network 140.16.3.0 0.0.0.127 area 0
+network 140.16.3.128 0.0.0.15 area 0
+network 140.16.3.144 0.0.0.3 area 0
+network 140.16.3.148 0.0.0.3 area 0
+
+no network 172.16.1.0 0.0.0.127 area 0
+no network 172.16.1.128 0.0.0.127 area 0
+no network 172.16.2.0 0.0.0.127 area 0
+no network 172.16.2.128 0.0.0.127 area 0
+no network 172.16.3.0 0.0.0.127 area 0
+no network 172.16.3.128 0.0.0.15 area 0
+no network 172.16.3.144 0.0.0.3 area 0
+no network 172.16.3.148 0.0.0.3 area 0
+
+do wr
+enable
+configure terminal
+interface GigabitEthernet1/0/2
+exit
+int vlan 10
+no shutdown
+ip add 140.16.1.1 255.255.255.128
+ip helper-address 140.16.3.130
+ex
+int vlan 10
+no sh
+ip add 140.16.1.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 20
+no sh
+ip add 140.16.1.129 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 30
+no sh
+ip add 140.16.2.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 40
+no sh
+ip add 140.16.2.129 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 50
+no sh
+ip add 140.16.3.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 60
+no sh
+ip add 140.16.3.129 255.255.255.240
+ip helper-address 140.16.3.130
+exit
+do wr
+enable
+configure terminal
+interface GigabitEthernet1/0/3
+ex
+ip route 0.0.0.0 0.0.0.0 gig1/0/1
+ip route 0.0.0.0 0.0.0.0 gig1/0/2 70
+do wr
+
+
+=========================================
+MULTILAYER-2 Switch
+
+
+
+en
+conf t
+hostname Mlt-SW2
+line console 0
+password cisco
+login
+exit
+enable password cisco
+no ip domain-lookup
+banner motd #NO Unauthorised Access!!!#
+service password-encryption
+do wr
+ip domain name cisco.net
+username admin password cisco
+crypto key generate rsa
+line vty 0 15
+login local
+transport input ssh
+exit
+do wr
+ip ssh version 2
+do wr
+enable
+configure terminal
+interface GigabitEthernet1/0/6
+exit
+int range gig1/0/3-8
+switchport mode trunk
+exit
+vlan 10
+name Sales
+vlan 20
+name HR
+vlan 30
+name Finance
+vlan 40
+name Admin
+vlan 50
+name ICT
+vlan 60
+name ServerRoom
+exit
+do wr
+en
+conf t
+int range gig1/0/1-2
+no switchport
+exit
+do wr
+int gig1/0/1
+ip address 140.16.3.153 255.255.255.252
+no shutdown
+exit
+int gig1/0/2
+ip address 140.16.3.157 255.255.255.252
+no shutdown
+exit
+do wr
+en
+conf t
+ip routing
+router ospf 10
+router-id 1.1.1.1
+network 140.16.1.0 0.0.0.127 area 0
+network 140.16.1.128 0.0.0.127 area 0
+network 140.16.2.0 0.0.0.127 area 0
+network 140.16.2.128 0.0.0.127 area 0
+network 140.16.3.0 0.0.0.127 area 0
+network 140.16.3.128 0.0.0.15 area 0
+network 140.16.3.152 0.0.0.3 area 0
+network 140.16.3.156 0.0.0.3 area 0
+
+
+no network 172.16.1.0 0.0.0.127 area 0
+no network 172.16.1.128 0.0.0.127 area 0
+no network 172.16.2.0 0.0.0.127 area 0
+no network 172.16.2.128 0.0.0.127 area 0
+no network 172.16.3.0 0.0.0.127 area 0
+no network 172.16.3.128 0.0.0.15 area 0
+no network 172.16.3.152 0.0.0.3 area 0
+no network 172.16.3.156 0.0.0.3 area 0
+exit
+do wr
+exit
+en
+conf t
+do reload
+en
+conf t
+do sh ospf neighbor
+do sh ip ospf neighbor
+do clear ip ospf process
+en
+conf t
+int vlan 10
+no sh
+ip add 140.16.1.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 20
+no sh
+ip add 140.16.1.129 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 30
+no sh
+ip add 140.16.2.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 40
+no sh
+ip add 140.16.2.129 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 50
+no sh
+ip add 140.16.3.1 255.255.255.128
+ip helper-address 140.16.3.130
+exit
+int vlan 60
+no sh
+ip add 140.16.3.129 255.255.255.240
+ip helper-address 140.16.3.130
+exit
+do wr
+en
+conf t
+ip route 0.0.0.0 0.0.0.0 gig1/0/1
+ip route 0.0.0.0 0.0.0.0 gig1/0/2 70
+do wr
+
+

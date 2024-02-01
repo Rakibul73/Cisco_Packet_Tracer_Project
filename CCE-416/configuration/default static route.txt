@@ -1,0 +1,16 @@
+# for multilayer 1 & 2 switch both
+
+ip route 0.0.0.0 0.0.0.0 gig1/0/1
+ip route 0.0.0.0 0.0.0.0 gig1/0/2 70
+
+do wr
+
+
+============================================
+# for core 1 & 2 router both
+
+ip route 0.0.0.0 0.0.0.0 se0/2/0
+ip route 0.0.0.0 0.0.0.0 se0/2/1 70
+
+do wr 
+

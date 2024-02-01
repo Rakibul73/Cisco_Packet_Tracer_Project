@@ -1,0 +1,24 @@
+int range fa0/1-2
+switchport mode trunk
+exit
+
+vlan 60
+name Server
+vlan 99
+name BlackHole
+exit
+
+int range fa0/3-24
+switchport mode access
+switchport access vlan 60
+exit
+
+int range gig0/1-2
+switchport mode access
+switchport access vlan 99
+exit
+
+
+do wr
+
+
